@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
 
-from app.core.database import get_db
-from app.models.models import User, Document, ReadingProgress, ClasseCode, UserRole
-from app.api.auth import get_current_user
+from database import get_db
+from models import User, Document, ReadingProgress, ClasseCode, UserRole
+from auth import get_current_user
 
 router = APIRouter()
 

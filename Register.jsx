@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../contexts/store';
+import { useAuthStore } from './store';
 import { BookOpen, Loader2 } from 'lucide-react';
 
 export default function Register() {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../contexts/store';
-import { adminAPI, authAPI, documentsAPI } from '../services/api';
+import { useAuthStore } from './store';
+import { adminAPI, authAPI, documentsAPI } from './apiClient.js';
 import { 
   ArrowLeft, Users, BookOpen, Clock, Plus, Upload, 
   Loader2, Code, FileText, FilePlus

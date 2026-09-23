@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore, useDocumentStore } from '../contexts/store';
-import { documentsAPI } from '../services/api';
+import { useAuthStore, useDocumentStore } from './store';
+import { documentsAPI } from './apiClient.js';
 import { BookOpen, LogOut, Plus, Truck, Wrench, Package, Loader2 } from 'lucide-react';
 
 const categoriesConfig = {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { documentsAPI, readingAPI } from '../services/api';
+import { documentsAPI, readingAPI } from './apiClient.js';
 import { ArrowLeft, Loader2, Languages, MessageCircle, Volume2 } from 'lucide-react';
 
 export default function ReadingView() {

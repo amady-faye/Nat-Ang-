@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from './contexts/store';
+import { useAuthStore } from './store';
 
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import ReadingView from './pages/ReadingView';
-import AdminPanel from './pages/AdminPanel';
+import Login from './Login';
+import Register from './Register';
+import Dashboard from './Dashboard';
+import ReadingView from './ReadingView';
+import AdminPanel from './AdminPanel';
 
 function PrivateRoute({ children }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);

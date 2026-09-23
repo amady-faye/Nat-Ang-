@@ -1,8 +1,15 @@
 import { create } from 'zustand';
-import { authAPI } from '../services/api';
+import { authAPI } from './apiClient.js';
 
 export const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: (() => {
+    try {
+      const item = localStorage.getItem('user');
+      return item && item !== 'undefined' ? JSON.parse(item) : null;
+    } catch (e) {
+      return null;
+    }
+  })(),
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
   

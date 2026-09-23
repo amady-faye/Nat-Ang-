@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from app.core.database import engine, Base, get_db
-from app.api import auth, documents, reading, admin
+from database import engine, Base, get_db
+import auth, documents, reading, admin
 
 load_dotenv()
 

@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-from app.core.database import get_db
-from app.core.security import verify_password, get_password_hash, create_access_token, decode_token
-from app.models.models import User, UserRole, ClasseCode
+from database import get_db
+from security import verify_password, get_password_hash, create_access_token, decode_token
+from models import User, UserRole, ClasseCode
 
 router = APIRouter()
 security = HTTPBearer()

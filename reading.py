@@ -6,9 +6,9 @@ from googletrans import Translator
 import os
 import json
 
-from app.core.database import get_db
-from app.models.models import User, Document, ReadingProgress
-from app.api.auth import get_current_user
+from database import get_db
+from models import User, Document, ReadingProgress
+from auth import get_current_user
 
 router = APIRouter()
 translator = Translator()
