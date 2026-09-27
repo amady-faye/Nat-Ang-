@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore, useDocumentStore } from './store';
 import { documentsAPI } from './apiClient.js';
 import { BookOpen, LogOut, Plus, Truck, Wrench, Package, Loader2 } from 'lucide-react';
+import DailyGoalWidget from './DailyGoalWidget.jsx';
 
 const categoriesConfig = {
   logistique: { icon: Package, color: 'bg-blue-100 text-blue-700', label: 'Logistique' },
@@ -99,6 +100,9 @@ export default function Dashboard() {
             Sélectionnez un document pour commencer votre apprentissage
           </p>
         </div>
+
+        {/* Objectif du jour */}
+        <DailyGoalWidget />
 
         {/* Filtres par catégorie */}
         <div className="flex flex-wrap gap-3 mb-8">
