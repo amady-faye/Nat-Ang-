@@ -174,9 +174,12 @@ export default function ReadingView() {
 
   const speakText = (text) => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Arrêter la lecture précédente
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
+      // Optionnel: on peut ajuster la vitesse (rate) ou la hauteur (pitch)
+      utterance.rate = 0.9; // Parle un tout petit peu plus lentement pour les apprenants
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -224,8 +227,17 @@ export default function ReadingView() {
           onTouchEnd={handleTextSelection}
         >
           {paragraphs.slice(0, currentParagraphIndex + 1).map((paragraph, index) => (
-            <div key={index} className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-sm leading-relaxed text-slate-800 text-lg fade-in">
-              {paragraph}
+            <div key={index} className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-sm leading-relaxed text-slate-800 text-lg fade-in relative">
+              <div className="pr-12">
+                {paragraph}
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); speakText(paragraph); }}
+                className="absolute top-4 right-4 p-2 bg-white text-blue-600 rounded-full shadow-sm hover:bg-blue-50 transition-colors border border-blue-100"
+                title="Écouter le paragraphe"
+              >
+                <Volume2 className="w-5 h-5" />
+              </button>
             </div>
           ))}
         </div>
