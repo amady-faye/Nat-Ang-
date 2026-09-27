@@ -203,6 +203,9 @@ export default function ReadingView() {
               {Math.floor(readingTime / 60)}:{(readingTime % 60).toString().padStart(2, '0')}
             </div>
           </div>
+        </div>
+      </header>
+
       {/* Contenu du document */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div
