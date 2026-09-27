@@ -6,6 +6,7 @@ import Register from './Register';
 import Dashboard from './Dashboard';
 import ReadingView from './ReadingView';
 import AdminPanel from './AdminPanel';
+import TrainingQuiz from './TrainingQuiz';
 
 function PrivateRoute({ children }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -42,6 +43,15 @@ function App() {
           element={
             <PrivateRoute>
               <AdminPanel />
+            </PrivateRoute>
+          }
+        />
+        
+        <Route
+          path="/training"
+          element={
+            <PrivateRoute>
+              <TrainingQuiz />
             </PrivateRoute>
           }
         />

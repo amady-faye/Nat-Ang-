@@ -131,9 +131,18 @@ export default function ReadingView() {
         });
         setTranslation(response.data.translated);
         
-        // Ajouter +1 au compteur de mots si l'objectif est le vocabulaire
-        // Pour éviter le spam, on ne compte que les mots courts (pas les phrases entières)
-        if (text.split(' ').length <= 3) {
+        // Sauvegarder le mot traduit dans le dictionnaire personnel
+        if (text.split(' ').length <= 3) { // Ne sauvegarder que les mots/petites expressions
+           const savedVocabStr = localStorage.getItem('savedVocabulary');
+           let userVocab = savedVocabStr ? JSON.parse(savedVocabStr) : [];
+           
+           // Eviter les doublons
+           if (!userVocab.find(v => v.word.toLowerCase() === text.toLowerCase())) {
+             userVocab.push({ word: text, translation: response.data.translated });
+             localStorage.setItem('savedVocabulary', JSON.stringify(userVocab));
+           }
+           
+           // Ajouter +1 au compteur d'objectif
            updateGoalProgress('vocabulary', 1);
         }
         

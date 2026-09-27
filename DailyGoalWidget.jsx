@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Target, CheckCircle2, ChevronRight, BookOpen, Clock, Brain, MessageSquare } from 'lucide-react';
 
 export default function DailyGoalWidget() {
@@ -39,6 +40,8 @@ export default function DailyGoalWidget() {
       localStorage.removeItem('dailyGoal');
     }
   }, [goal]);
+
+  const navigate = useNavigate();
 
   if (!goal) {
     return (
@@ -120,7 +123,10 @@ export default function DailyGoalWidget() {
         </div>
 
         {percentage >= 100 && (
-          <button className="mt-4 flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition-colors text-sm shadow-sm">
+          <button 
+            onClick={() => navigate('/training')}
+            className="mt-4 flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition-colors text-sm shadow-sm"
+          >
             Débloquer l'entraînement <ChevronRight className="w-4 h-4" />
           </button>
         )}
