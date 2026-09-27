@@ -15,9 +15,54 @@ export default function ReadingView() {
   const [translationPosition, setTranslationPosition] = useState({ x: 0, y: 0 });
   const [loadingTranslation, setLoadingTranslation] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
+  const [currentParagraphIndex, setCurrentParagraphIndex] = useState(0);
   
   const contentRef = useRef(null);
   const timerRef = useRef(null);
+  
+  const paragraphs = document?.contenu ? document.contenu.split('\n\n').filter(p => p.trim() !== '') : [];
+
+  const updateGoalProgress = (type, amount) => {
+    const goalStr = localStorage.getItem('dailyGoal');
+    if (!goalStr) return;
+    const goal = JSON.parse(goalStr);
+    
+    // Si l'objectif du jour ne correspond pas à l'action en cours, on ignore
+    if (goal.type !== type) return;
+
+    const progressStr = localStorage.getItem('dailyProgress');
+    const currentProgress = progressStr ? JSON.parse(progressStr) : { date: new Date().toDateString(), value: 0 };
+    
+    if (currentProgress.date === new Date().toDateString()) {
+      currentProgress.value += amount;
+      localStorage.setItem('dailyProgress', JSON.stringify(currentProgress));
+    } else {
+      localStorage.setItem('dailyProgress', JSON.stringify({ date: new Date().toDateString(), value: amount }));
+    }
+  };
+
+  const handleNextParagraph = () => {
+    if (currentParagraphIndex < paragraphs.length - 1) {
+      // Compter les mots lus
+      const wordCount = paragraphs[currentParagraphIndex].split(/\s+/).length;
+      updateGoalProgress('words', wordCount);
+      
+      setCurrentParagraphIndex(prev => prev + 1);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  };
+
+  const handleFinishReading = () => {
+    // Compter les mots du dernier paragraphe
+    const wordCount = paragraphs[currentParagraphIndex].split(/\s+/).length;
+    updateGoalProgress('words', wordCount);
+    
+    // Ajouter les minutes passées
+    const minutes = Math.max(1, Math.floor(readingTime / 60));
+    updateGoalProgress('minutes', minutes);
+    
+    navigate('/dashboard');
+  };
 
   useEffect(() => {
     loadDocument();
@@ -85,6 +130,13 @@ export default function ReadingView() {
           target_lang: 'fr'
         });
         setTranslation(response.data.translated);
+        
+        // Ajouter +1 au compteur de mots si l'objectif est le vocabulaire
+        // Pour éviter le spam, on ne compte que les mots courts (pas les phrases entières)
+        if (text.split(' ').length <= 3) {
+           updateGoalProgress('vocabulary', 1);
+        }
+        
       } catch (error) {
         console.error('Erreur traduction:', error);
         setTranslation('Erreur de traduction');
@@ -151,9 +203,6 @@ export default function ReadingView() {
               {Math.floor(readingTime / 60)}:{(readingTime % 60).toString().padStart(2, '0')}
             </div>
           </div>
-        </div>
-      </header>
-
       {/* Contenu du document */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div
@@ -162,11 +211,29 @@ export default function ReadingView() {
           onMouseUp={handleTextSelection}
           onTouchEnd={handleTextSelection}
         >
-          {document?.contenu.split('\n\n').map((paragraph, index) => (
-            <p key={index} className="mb-6 leading-relaxed">
+          {paragraphs.slice(0, currentParagraphIndex + 1).map((paragraph, index) => (
+            <div key={index} className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-sm leading-relaxed text-slate-800 text-lg fade-in">
               {paragraph}
-            </p>
+            </div>
           ))}
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          {currentParagraphIndex < paragraphs.length - 1 ? (
+            <button
+              onClick={handleNextParagraph}
+              className="bg-primary-600 text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-primary-700 hover:shadow-lg transition-all transform hover:scale-105"
+            >
+              Paragraphe suivant
+            </button>
+          ) : (
+            <button
+              onClick={handleFinishReading}
+              className="bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-green-600 hover:shadow-lg transition-all transform hover:scale-105"
+            >
+              Terminer la lecture
+            </button>
+          )}
         </div>
 
         {/* Instructions de lecture */}

@@ -7,7 +7,16 @@ export default function DailyGoalWidget() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(() => {
+    const savedProgress = localStorage.getItem('dailyProgress');
+    if (savedProgress) {
+      const parsed = JSON.parse(savedProgress);
+      if (parsed.date === new Date().toDateString()) {
+        return parsed.value;
+      }
+    }
+    return 0;
+  });
 
   const goalOptions = [
     { id: 'words', icon: BookOpen, label: 'Mots à lire', options: [100, 150, 200] },
