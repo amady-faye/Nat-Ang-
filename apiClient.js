@@ -52,6 +52,7 @@ export const documentsAPI = {
   uploadPDF: (formData) => api.post('/api/documents/upload-pdf', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  update: (id, data) => api.put(`/api/documents/${id}`, data),
   delete: (id) => api.delete(`/api/documents/${id}`),
 };
 

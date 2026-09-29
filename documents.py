@@ -180,3 +180,35 @@ async def delete_document(
     db.commit()
     
     return {"message": "Document supprimé avec succès"}
+
+@router.put("/{document_id}", response_model=DocumentResponse)
+async def update_document(
+    document_id: int,
+    document_update: DocumentCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    document = db.query(Document).filter(Document.id == document_id).first()
+    
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document non trouvé"
+        )
+    
+    # Seul le formateur qui a uploadé (ou un admin) peut modifier
+    if current_user.role != UserRole.FORMATEUR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous ne pouvez pas modifier ce document"
+        )
+    
+    document.titre = document_update.titre
+    document.categorie = document_update.categorie
+    document.contenu = document_update.contenu
+    document.is_public = document_update.is_public
+    
+    db.commit()
+    db.refresh(document)
+    
+    return document

@@ -14,14 +14,17 @@ export default function AdminPanel() {
   const [stats, setStats] = useState(null);
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [documentsList, setDocumentsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   
   // Formulaires
   const [showCreateClass, setShowCreateClass] = useState(false);
   const [showUploadDoc, setShowUploadDoc] = useState(false);
+  const [showEditDoc, setShowEditDoc] = useState(false);
   const [newClass, setNewClass] = useState({ code: '', nom_classe: '', specialite: 'logistique' });
   const [newDoc, setNewDoc] = useState({ titre: '', categorie: 'logistique', contenu: '' });
+  const [editDoc, setEditDoc] = useState({ id: null, titre: '', categorie: 'logistique', contenu: '' });
 
   useEffect(() => {
     if (user?.role !== 'formateur') {
@@ -34,15 +37,17 @@ export default function AdminPanel() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statsRes, studentsRes, classesRes] = await Promise.all([
+      const [statsRes, studentsRes, classesRes, docsRes] = await Promise.all([
         adminAPI.getStats(),
         adminAPI.getStudents(),
         adminAPI.getClasses(),
+        documentsAPI.list()
       ]);
       
       setStats(statsRes.data);
       setStudents(studentsRes.data);
       setClasses(classesRes.data);
+      setDocumentsList(docsRes.data);
     } catch (error) {
       console.error('Erreur chargement données:', error);
     }
@@ -68,9 +73,38 @@ export default function AdminPanel() {
       await documentsAPI.upload(newDoc);
       setShowUploadDoc(false);
       setNewDoc({ titre: '', categorie: 'logistique', contenu: '' });
+      loadData();
       alert('Document ajouté avec succès !');
     } catch (error) {
       alert(error.response?.data?.detail || 'Erreur lors de l\'ajout');
+    }
+  };
+
+  const handleUpdateDoc = async (e) => {
+    e.preventDefault();
+    try {
+      await documentsAPI.update(editDoc.id, {
+        titre: editDoc.titre,
+        categorie: editDoc.categorie,
+        contenu: editDoc.contenu,
+        is_public: true
+      });
+      setShowEditDoc(false);
+      loadData();
+      alert('Document modifié avec succès !');
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erreur lors de la modification');
+    }
+  };
+
+  const handleDeleteDoc = async (id) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce document ?")) {
+      try {
+        await documentsAPI.delete(id);
+        loadData();
+      } catch (error) {
+        alert(error.response?.data?.detail || 'Erreur lors de la suppression');
+      }
     }
   };
 
@@ -200,6 +234,16 @@ export default function AdminPanel() {
           >
             Élèves
           </button>
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`px-4 py-2 font-medium ${
+              activeTab === 'documents'
+                ? 'border-b-2 border-primary-600 text-primary-600'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Documents
+          </button>
         </div>
 
         {/* Contenu selon l'onglet */}
@@ -276,6 +320,43 @@ export default function AdminPanel() {
             )}
           </div>
         )}
+
+        {activeTab === 'documents' && (
+          <div className="card">
+            <h3 className="text-lg font-semibold mb-4">Liste des documents</h3>
+            {documentsList.length === 0 ? (
+              <p className="text-slate-600 text-center py-8">Aucun document existant</p>
+            ) : (
+              <div className="space-y-4">
+                {documentsList.map((doc) => (
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-slate-900">{doc.titre}</div>
+                      <div className="text-sm text-slate-500 capitalize">{doc.categorie}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          setEditDoc(doc);
+                          setShowEditDoc(true);
+                        }}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm font-medium"
+                      >
+                        Éditer
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteDoc(doc.id)}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-medium"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* Modal Créer classe */}
@@ -341,6 +422,9 @@ export default function AdminPanel() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8">
             <h3 className="text-xl font-bold mb-4">Ajouter un document</h3>
+            <div className="mb-4 text-sm text-slate-600 bg-blue-50 p-3 rounded-lg">
+              <span className="font-bold">Info Mise en Page :</span> Pour créer un nouveau paragraphe, appuyez <strong>deux fois sur Entrée</strong> (laissez une ligne vide entre les blocs de texte).
+            </div>
             <form onSubmit={handleUploadDoc} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Titre</label>
@@ -385,6 +469,67 @@ export default function AdminPanel() {
                 <button
                   type="button"
                   onClick={() => setShowUploadDoc(false)}
+                  className="btn-secondary flex-1"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal Edit document */}
+      {showEditDoc && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 my-8">
+            <h3 className="text-xl font-bold mb-4">Éditer le document</h3>
+            <div className="mb-4 text-sm text-slate-600 bg-blue-50 p-3 rounded-lg">
+              <span className="font-bold">Info Mise en Page :</span> Pour créer un nouveau paragraphe, appuyez <strong>deux fois sur Entrée</strong> (laissez une ligne vide entre les blocs de texte).
+            </div>
+            <form onSubmit={handleUpdateDoc} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Titre</label>
+                <input
+                  type="text"
+                  value={editDoc.titre}
+                  onChange={(e) => setEditDoc({ ...editDoc, titre: e.target.value })}
+                  className="input-field"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Catégorie</label>
+                <select
+                  value={editDoc.categorie}
+                  onChange={(e) => setEditDoc({ ...editDoc, categorie: e.target.value })}
+                  className="input-field"
+                >
+                  <option value="logistique">Logistique</option>
+                  <option value="transport">Transport routier</option>
+                  <option value="mecanique">Mécanique</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Contenu (texte en anglais)</label>
+                <textarea
+                  value={editDoc.contenu}
+                  onChange={(e) => setEditDoc({ ...editDoc, contenu: e.target.value })}
+                  className="input-field font-mono text-sm"
+                  rows={16}
+                  placeholder="Collez ici le texte en anglais..."
+                  required
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button type="submit" className="btn-primary flex-1 bg-blue-600 hover:bg-blue-700">
+                  Enregistrer les modifications
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditDoc(false)}
                   className="btn-secondary flex-1"
                 >
                   Annuler
